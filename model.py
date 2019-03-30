@@ -57,13 +57,12 @@ class DynamicModel(object):
         }
         return self.sess.run([self.loss, self.opt], feed_dict)[:-1]
 
-    def collect(self, obses, acts, next_obses):
-        for obs, act, next_obs in zip(obses, acts, next_obses):
-            self.obs_buffer.append(obs)
-            self.act_buffer.append(act)
-            self.next_obs_buffer.append(next_obs)
+    def collect(self, obs, act, next_obs):
+        self.obs_buffer.append(obs)
+        self.act_buffer.append(act)
+        self.next_obs_buffer.append(next_obs)
         
-    def train(self, batch_size, epochs):
+    def train(self, batch_size=64, epochs=10):
         buffer_len = len(self.obs_buffer)
         inds = np.arange(buffer_len)
         total_loss = []

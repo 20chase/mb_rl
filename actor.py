@@ -17,6 +17,28 @@ class Actor(object):
         x = tf.layers.dense(
             x, 64, activation=tf.nn.tanh
         )
-        x = tf.layers.dense(
+        self.mean = tf.layers.dense(
             x, self.act_dim
         )
+
+        logvar_speed = self.act_dim * 2.0
+        log_vars = tf.get_variable(
+            "log_vars", (logvar_speed, self.act_dim),
+            tf.float32, tf.constant_initializer(0.0)
+        )
+        self.log_vars = tf.reduce_sum(log_vars, axis=0) - 1.0
+
+        self.sampled_act = self.mean + \
+            tf.exp(self.log_vars / 2.0) * tf.random_normal(shape=(self.act_dim,))
+
+    def sampling(self, obses):
+        feed_dict = {
+            self.obs_ph: obses
+        }
+        return self.sess.run(self.sampled_act, feed_dict)
+
+    def act(self, obses):
+        feed_dict = {
+            self.obs_ph: obses
+        }
+        return self.sess.run(self.mean, feed_dict)
