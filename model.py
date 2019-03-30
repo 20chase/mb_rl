@@ -31,11 +31,15 @@ class DynamicModel(object):
         )
 
     def _build_net(self):
-        net_in = tf.concat([self.obs_ph, self.act_ph], axis=1)
+        net_in = tf.concat(
+            [self.obs_ph, self.act_ph], axis=1)
 
-        x = tf.layers.dense(net_in, 128, activation=tf.nn.tanh)
-        x = tf.layers.dense(x, 64, activation=tf.nn.tanh)
-        x = tf.layers.dense(x, self.obs_dim)
+        x = tf.layers.dense(
+            net_in, 128, activation=tf.nn.tanh)
+        x = tf.layers.dense(
+            x, 64, activation=tf.nn.tanh)
+        x = tf.layers.dense(
+            x, self.obs_dim)
         
         self.pred_obs = x + self.obs_ph
 
