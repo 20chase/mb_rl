@@ -57,10 +57,10 @@ class DynamicModel(object):
         }
         return self.sess.run([self.loss, self.opt], feed_dict)[:-1]
 
-    def collect(self, obs, act, next_obs):
-        self.obs_buffer.append(obs)
-        self.act_buffer.append(act)
-        self.next_obs_buffer.append(next_obs)
+    def collect(self, obses, acts, next_obses):
+        self.obs_buffer.extend(obses)
+        self.act_buffer.extend(acts)
+        self.next_obs_buffer.extend(next_obses)
         
     def train(self, batch_size=64, epochs=10):
         buffer_len = len(self.obs_buffer)

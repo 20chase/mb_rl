@@ -13,7 +13,7 @@ class Critic(object):
 
     def _build_ph(self):
         self.ret_ph = tf.placeholder(
-            tf.float32, [None], "ret_ph"
+            tf.float32, [None, 1], "ret_ph"
         )
 
     def _build_net(self):
@@ -40,7 +40,9 @@ class Critic(object):
         }
         return self.sess.run([self.loss, self.opt], feed_dict)[:-1]
     
-    def train(self, obses, rets, batch_size, epochs=20):
+    def train(self, obses, rets, batch_size=64, epochs=20):
+        def to_np(arr):
+            return np.asarray(arr)
         total_len = len(rets)
         inds = np.arange(total_len)
         total_loss = []
@@ -51,7 +53,7 @@ class Critic(object):
                 if (end + batch_size) > total_len:
                     end = total_len
                 mbinds = inds[start:end]
-                slices = (arr[mbinds] for arr in (obses, rets))
+                slices = (to_np(arr)[mbinds] for arr in (obses, rets))
                 total_loss.append(self._fit(*slices))
         
         return np.mean(total_loss)
