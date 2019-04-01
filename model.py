@@ -12,9 +12,12 @@ class DynamicModel(object):
         self._build_net()
         self._build_opt()
 
-        self.obs_buffer = []
+        self.init_buffer()
+
+    def init_buffer(self):
+        self.ob_buffer = []
         self.act_buffer = []
-        self.next_obs_buffer = []
+        self.next_ob_buffer = []
 
     def _build_ph(self):
         self.obs_ph = tf.placeholder(
@@ -58,15 +61,17 @@ class DynamicModel(object):
         return self.sess.run([self.loss, self.opt], feed_dict)[:-1]
 
     def collect(self, obses, acts, next_obses):
-        self.obs_buffer.extend(obses)
+        self.ob_buffer.extend(obses)
         self.act_buffer.extend(acts)
-        self.next_obs_buffer.extend(next_obses)
+        self.next_ob_buffer.extend(next_obses)
         
-    def train(self, batch_size=64, epochs=20):
+    def train(self, last_ind, batch_size=256, epochs=20):
         def to_np(arr):
             return np.asarray(arr)
-        buffer_len = len(self.obs_buffer)
-        inds = np.arange(buffer_len)
+        buffer_len = len(self.ob_buffer)
+        if buffer_len - last_ind < 0:
+            last_ind = buffer_len
+        inds = np.arange(buffer_len-last_ind, buffer_len)
         total_loss = []
         for _ in range(epochs):
             np.random.shuffle(inds)
@@ -75,12 +80,12 @@ class DynamicModel(object):
                 if (end + batch_size) > buffer_len:
                     end = buffer_len
                 mbinds = inds[start:end]
-                slices = (to_np(arr)[mbinds] for arr in (self.obs_buffer,
+                slices = (to_np(arr)[mbinds] for arr in (self.ob_buffer,
                                                   self.act_buffer,
-                                                  self.next_obs_buffer))
+                                                  self.next_ob_buffer))
                 total_loss.append(self._fit(*slices))
         
-        return np.mean(total_loss)
+        print("model_loss", np.mean(total_loss))
 
     def predict(self, obses, acts):
         feed_dict = {
