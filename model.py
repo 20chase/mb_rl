@@ -47,7 +47,7 @@ class DynamicModel(object):
         self.loss = tf.losses.mean_squared_error(
             self.next_obs_ph, self.pred_obs
         )
-        self.opt = tf.train.AdamOptimizer(1e-4).minimize(self.loss)
+        self.opt = tf.train.AdamOptimizer(1e-3).minimize(self.loss)
 
     def _fit(self, obs, act, next_obs):
         feed_dict = {
@@ -62,7 +62,9 @@ class DynamicModel(object):
         self.act_buffer.extend(acts)
         self.next_obs_buffer.extend(next_obses)
         
-    def train(self, batch_size=64, epochs=10):
+    def train(self, batch_size=64, epochs=20):
+        def to_np(arr):
+            return np.asarray(arr)
         buffer_len = len(self.obs_buffer)
         inds = np.arange(buffer_len)
         total_loss = []
@@ -73,7 +75,7 @@ class DynamicModel(object):
                 if (end + batch_size) > buffer_len:
                     end = buffer_len
                 mbinds = inds[start:end]
-                slices = (arr[mbinds] for arr in (self.obs_buffer,
+                slices = (to_np(arr)[mbinds] for arr in (self.obs_buffer,
                                                   self.act_buffer,
                                                   self.next_obs_buffer))
                 total_loss.append(self._fit(*slices))

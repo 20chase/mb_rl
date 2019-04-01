@@ -13,7 +13,7 @@ class Critic(object):
 
     def _build_ph(self):
         self.ret_ph = tf.placeholder(
-            tf.float32, [None, 1], "ret_ph"
+            tf.float32, [None], "ret_ph"
         )
 
     def _build_net(self):
@@ -25,11 +25,11 @@ class Critic(object):
         )
         self.value = tf.layers.dense(
             x, 1
-        )
+        )[:, 0]
 
     def _build_opt(self):
-        self.loss = tf.losses.mean_squared_error(
-            self.ret_ph, self.value
+        self.loss = tf.reduce_mean(
+            tf.square(self.value - self.ret_ph)
         )
         self.opt = tf.train.AdamOptimizer(1e-3).minimize(self.loss)
         

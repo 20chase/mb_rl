@@ -66,8 +66,9 @@ class Runner(object):
                                            self.mb_values, last_value)
             self.critic.train(self.mb_obses, rets)
             self.model.collect(self.mb_obses, self.mb_acts, self.mb_next_obses)
-            self.model.train()
-            print("episode: {} | rewards: {}".format(e, np.sum(self.mb_rewards)))
+            model_loss = self.model.train()
+            print("episode: {} | rewards: {} | model_loss: {}".format(
+                e, np.sum(self.mb_rewards), model_loss))
 
 if __name__ == "__main__":
     env = gym.make("Pendulum-v0")
