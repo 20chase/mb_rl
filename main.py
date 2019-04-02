@@ -39,7 +39,7 @@ class Runner(object):
     def random_run(self):
         self._init_mb()
         obs = env.reset()
-        for _ in range(300):
+        for _ in range(1000):
             acts = self.controller.random_step(obs)
             next_obs, rews, dones, _ = self.env.step(acts)
             self._collect_mb(obs, acts, next_obs)
@@ -47,15 +47,15 @@ class Runner(object):
         self.model.collect(self.mb_obs,
                            self.mb_acts,
                            self.mb_next_obs)
-        self.model.train(6000)
+        self.model.train(10000)
         
     def mpc_run(self):
         self._init_mb()
         obs = env.reset()
         mb_rews = []
-        for _ in range(200):
+        for _ in range(500):
             acts = self.controller.step(obs)
-            next_obs, rews, dones, _ = self.env.step(acts)
+            next_obs, rews, _, _ = self.env.step(acts)
             self._collect_mb(obs, acts, next_obs)
             mb_rews.append(rews)
 
@@ -64,13 +64,13 @@ class Runner(object):
         self.model.collect(self.mb_obs,
                            self.mb_acts,
                            self.mb_next_obs)
-        self.model.train(6000)
+        self.model.train(100000)
 
         return np.mean(np.sum(mb_rews, axis=0))
             
 
 if __name__ == "__main__":
-    env = create_multi_env("MbHalfCheetah-v0", 16)
+    env = create_multi_env("MbHalfCheetah-v0", 32)
     obs_dim = env.observation_space.shape[0]
     act_dim = env.action_space.shape[0]
 
@@ -91,8 +91,6 @@ if __name__ == "__main__":
     for e in range(100):
         print("episode {}: {}".format(
             e, runner.mpc_run()))
-        if e % 10 == 0 and (e != 0):
-            model.init_buffer()
     # runner.run()
 
 

@@ -38,9 +38,9 @@ class DynamicModel(object):
             [self.obs_ph, self.act_ph], axis=1)
 
         x = tf.layers.dense(
-            net_in, 128, activation=tf.nn.tanh)
+            net_in, 256, activation=tf.nn.relu)
         x = tf.layers.dense(
-            x, 64, activation=tf.nn.tanh)
+            x, 256, activation=tf.nn.relu)
         x = tf.layers.dense(
             x, self.obs_dim)
         
